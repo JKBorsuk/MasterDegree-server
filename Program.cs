@@ -8,57 +8,65 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddControllers();
-
-builder.Services.AddDbContext<MasterDegreeDbContext>(options =>
+try
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("sqlConnection"));
-});
+    var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddScoped<IDataService, DataService>();
-builder.Services.AddScoped<IUserService, UserService>();
+    builder.Services.AddControllers();
 
-builder.Services.AddScoped<IDataRepository, DataRepository>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-
-#region AuthorizationSettings
-
-var configuration = new ConfigurationBuilder()
-    .SetBasePath(builder.Environment.ContentRootPath)
-    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
-    .Build();
-
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
+    builder.Services.AddDbContext<MasterDegreeDbContext>(options =>
     {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = configuration["JwtSettings:Issuer"],
-            ValidAudience = configuration["JwtSettings:Audience"],
-            LifetimeValidator = TokenLifetimeValidator.Validate,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtSettings:SecretKey"]!)),
-            ClockSkew = TimeSpan.Zero
-        };
+        options.UseSqlServer(builder.Configuration.GetConnectionString("sqlConnection"));
     });
 
-#endregion
+    builder.Services.AddScoped<IDataService, DataService>();
+    builder.Services.AddScoped<IUserService, UserService>();
 
-var app = builder.Build();
+    builder.Services.AddScoped<IDataRepository, DataRepository>();
+    builder.Services.AddScoped<IUserRepository, UserRepository>();
 
-app.UseCors(options =>
+    #region AuthorizationSettings
+
+    var configuration = new ConfigurationBuilder()
+        .SetBasePath(builder.Environment.ContentRootPath)
+        .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+        .Build();
+
+
+    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = configuration["JwtSettings:Issuer"],
+                ValidAudience = configuration["JwtSettings:Audience"],
+                LifetimeValidator = TokenLifetimeValidator.Validate,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtSettings:SecretKey"]!)),
+                ClockSkew = TimeSpan.Zero
+            };
+        });
+
+    #endregion
+
+    var app = builder.Build();
+
+    app.UseCors(options =>
+    {
+        options.AllowAnyHeader();
+        options.AllowAnyMethod();
+        options.AllowAnyOrigin();
+    });
+
+    app.MapControllers();
+
+    app.Run();
+}
+catch (Exception ex)
 {
-    options.AllowAnyHeader();
-    options.AllowAnyMethod();
-    options.AllowAnyOrigin();
-});
-
-app.MapControllers();
-
-app.Run();
+    File.WriteAllText("startup-error.txt", ex.ToString());
+    throw;
+}

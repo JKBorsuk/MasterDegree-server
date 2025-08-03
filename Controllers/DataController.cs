@@ -13,6 +13,11 @@ namespace MasterDegree.Controllers
     [Route("[controller]")]
     public class DataController(IDataService dataService) : Controller
     {
+        [HttpGet("all")]
+        public async Task<IActionResult> GetAll()
+        {
+            return Ok(await ExecuteUtil<List<Product>>.Execute(async () => await dataService.GetAllProducts()));
+        }
         [Authorize]
         [HttpPost("user-favorites")]
         public async Task<IActionResult> GetUserFavoritesDataPagingAsync(PagingHeader pagingHeader)

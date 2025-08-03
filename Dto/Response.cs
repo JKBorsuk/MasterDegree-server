@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-
-namespace MasterDegree.Dto
+﻿namespace MasterDegree.Dto
 {
     public class Response<T>
     {

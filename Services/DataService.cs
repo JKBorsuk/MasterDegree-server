@@ -7,38 +7,37 @@ namespace MasterDegree.Services
 {
     public class DataService(IDataRepository dataRepository, IUserRepository userRepository) : IDataService
     {
+        public async Task<List<Product>> GetAllProducts()
+        {
+            return await dataRepository.GetAllProducts();
+        }
+
         public async Task<PagingContent<Product>> GetUserFavoritesDataWithPaging(int userId, PagingHeader pagingHeader)
         {
-            List<Product> products = await dataRepository.GetFavoritesProductsWithPaging(userId, pagingHeader);
-            int productsCount = await dataRepository.GetFavoritesProductsCount(userId);
             return new PagingContent<Product>
             {
-                Content = products,
-                Count = productsCount,
+                Content = await dataRepository.GetFavoritesProductsWithPaging(userId, pagingHeader),
+                Count = await dataRepository.GetFavoritesProductsCount(userId),
                 PageIndex = pagingHeader.PageIndex
             };
         }
 
         public async Task<PagingContent<Product>> GetDataWithPaging(PagingHeader pagingHeader)
         {
-            List<Product> products = await dataRepository.GetProductsWithPaging(pagingHeader);
-            int productsCount = await dataRepository.GetProductsCount();
             return new PagingContent<Product>
             {
-                Content = products,
-                Count = productsCount,
+                Content = await dataRepository.GetProductsWithPaging(pagingHeader),
+                Count = await dataRepository.GetProductsCount(),
                 PageIndex = pagingHeader.PageIndex
             };
         }
 
         public async Task<PagingContent<Product>> GetDataWithPagingAndParam(PagingHeader pagingHeader, string productName)
         {
-            List<Product> products = await dataRepository.GetProductsWithPagingAndParam(pagingHeader, productName);
-            int productsCount = await dataRepository.GetProductsCountByParam(productName);
             return new PagingContent<Product>
             {
-                Content = products,
-                Count = productsCount,
+                Content = await dataRepository.GetProductsWithPagingAndParam(pagingHeader, productName),
+                Count = await dataRepository.GetProductsCountByParam(productName),
                 PageIndex = pagingHeader.PageIndex
             };
         }
@@ -49,18 +48,18 @@ namespace MasterDegree.Services
             Product? product = await dataRepository.GetProductById(productId) ?? throw new Exception(ErrorMessage.ERROR_PRODUCT_NOT_FOUND);
             UserFavorites? userFavorite = await userRepository.GetUserFavorite(userId, productId);
 
-            if(userFavorite == null)
+            if(userFavorite != null)
             {
-                user.Favorites.Add(new UserFavorites()
-                {
-                    User = user,
-                    Product = product
-                });
-
-                return await userRepository.UpdateUser(user);
+                throw new Exception(ErrorMessage.ERROR_FAVORITE_EXISTS);
             }
 
-            return -1;
+            user.Favorites.Add(new UserFavorites()
+            {
+                User = user,
+                Product = product
+            });
+
+            return await userRepository.UpdateUser(user);
         }
 
         public async Task<int> RemoveFavoriteProduct(int userId, int productId)

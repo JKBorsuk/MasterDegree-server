@@ -24,6 +24,16 @@ namespace MasterDegree.Services
                 throw new Exception(ErrorMessage.ERROR_USER_EXISTS);
             }
 
+            if(!UserUtils.VerifyEmail(userData.Email))
+            {
+                throw new Exception(ErrorMessage.ERROR_EMAIL_DATA);
+            }
+
+            if(userData.Password.Length < 3)
+            {
+                throw new Exception(ErrorMessage.ERROR_PASSWORD_DATA);
+            }
+
             User user = new()
             {
                 Email = userData.Email,
@@ -61,8 +71,7 @@ namespace MasterDegree.Services
                 configuration["JwtSettings:Issuer"],
                 configuration["JwtSettings:Audience"],
                 configuration["JwtSettings:SecretKey"]!,
-                claims,
-                false
+                claims
             );
         }
     }

@@ -7,16 +7,15 @@ namespace MasterDegree.Repository
 {
     public class DataRepository(MasterDegreeDbContext masterDegreeDbContext) : IDataRepository
     {
+        public async Task<List<Product>> GetAllProducts()
+        {
+            return await masterDegreeDbContext.Products
+                .ToListAsync();
+        }
         public async Task<int> GetFavoritesProductsCount(int userId)
         {
             return await masterDegreeDbContext.UserFavorites
                 .Where(x => x.UserId == userId)
-                .CountAsync();
-        }
-
-        public async Task<int> GetProductsCount()
-        {
-            return await masterDegreeDbContext.Products
                 .CountAsync();
         }
 
@@ -41,6 +40,11 @@ namespace MasterDegree.Repository
                 .Skip(pagingHeader.PageIndex * pagingHeader.PageSize)
                 .Take(pagingHeader.PageSize)
                 .ToListAsync();
+        }
+        public async Task<int> GetProductsCount()
+        {
+            return await masterDegreeDbContext.Products
+                .CountAsync();
         }
 
         public async Task<List<Product>> GetProductsWithPagingAndParam(PagingHeader pagingHeader, string productName)

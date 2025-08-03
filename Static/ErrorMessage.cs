@@ -8,7 +8,10 @@
         public const string ERROR_USER_NOT_FOUND_BY_EMAIL = "Nie znaleziono użytkownika o podanym adresie E-mail.";
         public const string ERROR_USER_PASSWORD_INCORRECT = "Nie znaleziono użytkownika o takiej kombinacji adresu E-mail oraz hasła.";
         public const string ERROR_DATA = "Zostały podane błędne dane.";
+        public const string ERROR_FAVORITE_EXISTS = "Podany produkt już został przez Ciebie polubiony.";
         public const string ERROR_USER_EXISTS = "Użytkownik o podanym adresie e-mail już istnieje.";
+        public const string ERROR_EMAIL_DATA = "Został podany niepoprawny adres e-mail.";
+        public const string ERROR_PASSWORD_DATA = "Podane hasło jest za krótkie, musi ono posiadać minimum 3 znaki.";
         public const string ERROR_CREATE_USER = "Wystąpił błąd w trakcie tworzenia użytkownika.";
     }
 }
